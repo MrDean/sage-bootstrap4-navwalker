@@ -7,7 +7,7 @@ To install, run the following in your Sage9-based theme directory:
 composer require "MrDean/sage-pagewalker"
 ```
 
-Include the navwalker in your `wp_list_pages` function:
+Include the pagewalker in your `wp_list_pages` function:
 
 ## As a [Controller](https://github.com/soberwp/controller) method (Recommended)
 In your Controller, probably `app.php`
