@@ -1,225 +1,287 @@
 <?php
 namespace App;
 /**
- * Bootstrap 4 "Navbar" component navwalker drop-in functionality for Sage 9
- * Version: 1.0
- * Author: Michael W. Delaney
+ * Custom Card-style page walker for Sage 9
+ * Version: 0.1
+ * Author: Dean Rud
  * 
  */
 
-/**
- * Class Name: wp_bootstrap4_navwalker
- * GitHub URI: https://github.com/twittem/wp-bootstrap-navwalker
- * Description: A custom WordPress nav walker class to implement the Bootstrap 3 navigation style in a custom theme using the WordPress built in menu manager.
- * Version: 2.0.4
- * Author: Edward McIntyre - @twittem
- * License: GPL-2.0+
- * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
- */
+namespace App;
 
-class wp_bootstrap4_navwalker extends \Walker_Nav_Menu {
-		/**
-	 * @see Walker::start_lvl()
-	 * @since 3.0.0
-	 *
-	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param int $depth Depth of page. Used for padding.
-	 */
-	public function start_lvl( &$output, $depth = 0, $args = array() ) {
-		$indent = str_repeat( "\t", $depth );
-		$output .= "\n$indent<div role=\"menu\" class=\" dropdown-menu\">\n";
-	}
-	/**
-	 * Ends the list of after the elements are added.
-	 *
-	 * @see Walker::end_lvl()
-	 *
-	 * @since 3.0.0
-	 *
-	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param int    $depth  Depth of menu item. Used for padding.
-	 * @param array  $args   An array of arguments. @see wp_nav_menu()
-	 */
-	public function end_lvl( &$output, $depth = 0, $args = array() ) {
-		$indent = str_repeat("\t", $depth);
-		$output .= "$indent</div>\n";
-	}
-	/**
-	 * Start the element output.
-	 *
-	 * @see Walker::start_el()
-	 *
-	 * @since 3.0.0
-	 *
-	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param object $item   Menu item data object.
-	 * @param int    $depth  Depth of menu item. Used for padding.
-	 * @param array  $args   An array of arguments. @see wp_nav_menu()
-	 * @param int    $id     Current item ID.
-	 */
-	public function end_el( &$output, $item, $depth = 0, $args = array() ) {
-		if($depth === 1){
-			if(strcasecmp( $item->attr_title, 'divider' ) == 0 || strcasecmp( $item->title, 'divider') == 0) {
-				$output .= '</div>';
-			}else if ($depth === 1 && (strcasecmp( $item->attr_title, 'header') == 0 && $depth === 1)) {
-				$output .= '</h6>';
-			}
-		}else{
-			$output .= '</li>';
-		}
-	}
-	/**
-	 * @see Walker::start_el()
-	 * @since 3.0.0
-	 *
-	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param object $item Menu item data object.
-	 * @param int $depth Depth of menu item. Used for padding.
-	 * @param int $current_page Menu item ID.
-	 * @param object $args
-	 */
-	public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
-		$indent = ( $depth ) ? str_repeat( "\t", $depth ) : '';
-		/**
-		 * Dividers, Headers or Disabled
-		 * =============================
-		 * Determine whether the item is a Divider, Header, Disabled or regular
-		 * menu item. To prevent errors we use the strcasecmp() function to so a
-		 * comparison that is not case sensitive. The strcasecmp() function returns
-		 * a 0 if the strings are equal.
-		 */
-		//( strcasecmp($item->attr_title, 'disabled' ) == 0 ) 
-		
-		if($depth === 1 && (strcasecmp( $item->attr_title, 'divider' ) == 0 || strcasecmp( $item->title, 'divider') == 0)) {
-			$output .= $indent . '<div class="dropdown-divider">';
-		}else if ((strcasecmp( $item->attr_title, 'header') == 0 && $depth === 1) && $depth === 1){
-			$output .= $indent . '<h6 class="dropdown-header">' . esc_attr( $item->title );
-		}else{
-			$class_names = $value = '';
-			$classes = empty( $item->classes ) ? array() : (array) $item->classes;
-			
-			$atts = array();
-			$atts['title']  = ! empty( $item->title )	? $item->title	: '';
-			$atts['target'] = ! empty( $item->target )	? $item->target	: '';
-			$atts['rel']    = ! empty( $item->xfn )		? $item->xfn	: '';
-			$atts['href'] = ! empty( $item->url ) ? $item->url : '';
-			$id = apply_filters( 'nav_menu_item_id', 'menu-item-'. $item->ID, $item, $args );
-			
-			if ( in_array( 'current-menu-item', $classes ) )
-				$classes[] = ' active';
-			if($depth === 0){
-				$classes[] = 'nav-item';
-				$classes[] = 'nav-item-' . $item->ID;
-				$atts['class']			= 'nav-link';
-				if ( $args->has_children ){
-					$classes[] = ' dropdown';
-					$atts['href']   		= '#';
-					$atts['data-toggle']	= 'dropdown';
-					$atts['class']			= 'dropdown-toggle nav-link';
-					$atts['role']	= 'button';
-					$atts['aria-haspopup']	= 'true';
-				}
-				$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args ) );
-				$class_names = $class_names ? ' class="' . esc_attr( $class_names ) . '"' : '';
-				$id = $id ? ' id="' . esc_attr( $id ) . '"' : '';
-				$output .= $indent . '<li' . $id . $value . $class_names .'>';
-			}else{
-				$classes[] = 'dropdown-item';
-				$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args ) );
-				$atts['class'] = $class_names;
-				$atts['id'] = $id;
-			}
-			
-			$atts = apply_filters( 'nav_menu_link_attributes', $atts, $item, $args );
-			$attributes = '';
-			foreach ( $atts as $attr => $value ) {
-				if ( ! empty( $value ) ) {
-					$value = ( 'href' === $attr ) ? esc_url( $value ) : esc_attr( $value );
-					$attributes .= ' ' . $attr . '="' . $value . '"';
-				}
-			}
-			$item_output = $args->before;
-			$item_output .= '<a'. $attributes .'>';
-			
-			/*
-			 * Icons
-			 * ===========
-			 * Since the the menu item is NOT a Divider or Header we check the see
-			 * if there is a value in the attr_title property. If the attr_title
-			 * property is NOT null we apply it as the class name for the icon
-			 */
-			if ( ! empty( $item->attr_title ) ){
-				$item_output .= '<span class="' . esc_attr( $item->attr_title ) . '"></span>&nbsp;';
-			}
-			$item_output .= $args->link_before . apply_filters( 'the_title', $item->title, $item->ID ) . $args->link_after;
-			$item_output .= '</a>';
-			$item_output .= $args->after;
-			$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
-		}
-	}
-	/**
-	 * Traverse elements to create list from elements.
-	 *
-	 * Display one element if the element doesn't have any children otherwise,
-	 * display the element and its children. Will only traverse up to the max
-	 * depth and no ignore elements under that depth.
-	 *
-	 * This method shouldn't be called directly, use the walk() method instead.
-	 *
-	 * @see Walker::start_el()
-	 * @since 2.5.0
-	 *
-	 * @param object $element Data object
-	 * @param array $children_elements List of elements to continue traversing.
-	 * @param int $max_depth Max depth to traverse.
-	 * @param int $depth Depth of current element.
-	 * @param array $args
-	 * @param string $output Passed by reference. Used to append additional content.
-	 * @return null Null on failure with no changes to parameters.
-	 */
-	public function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ) {
-		if ( ! $element )
-			return;
-		$id_field = $this->db_fields['id'];
-		// Display this element.
-		if ( is_object( $args[0] ) )
-			$args[0]->has_children = ! empty( $children_elements[ $element->$id_field ] );
-		parent::display_element( $element, $children_elements, $max_depth, $depth, $args, $output );
-	}
-	/**
-	 * Menu Fallback
-	 * =============
-	 * If this function is assigned to the wp_nav_menu's fallback_cb variable
-	 * and a manu has not been assigned to the theme location in the WordPress
-	 * menu manager the function with display nothing to a non-logged in user,
-	 * and will add a link to the WordPress menu manager if logged in as an admin.
-	 *
-	 * @param array $args passed from the wp_nav_menu function.
-	 *
-	 */
-	public static function fallback( $args ) {
-		if ( current_user_can( 'manage_options' ) ) {
-			extract( $args );
-			$fb_output = null;
-			if ( $container ) {
-				$fb_output = '<' . $container;
-				if ( $container_id )
-					$fb_output .= ' id="' . $container_id . '"';
-				if ( $container_class )
-					$fb_output .= ' class="' . $container_class . '"';
-				$fb_output .= '>';
-			}
-			$fb_output .= '<ul';
-			if ( $menu_id )
-				$fb_output .= ' id="' . $menu_id . '"';
-			if ( $menu_class )
-				$fb_output .= ' class="' . $menu_class . '"';
-			$fb_output .= '>';
-			$fb_output .= '<li><a href="' . admin_url( 'nav-menus.php' ) . '">Add a menu</a></li>';
-			$fb_output .= '</ul>';
-			if ( $container )
-				$fb_output .= '</' . $container . '>';
-			echo $fb_output;
-		}
-	}
+// CUSTOM PAGE WALKER
+class Walker_Submap extends \Page_Walker {
+
+    /**
+     * What the class handles.
+     *
+     * @since 2.1.0
+     * @var string
+     *
+     * @see Walker::$tree_type
+     */
+    public $tree_type = 'page';
+
+    /**
+     * Database fields to use.
+     *
+     * @since 2.1.0
+     * @var array
+     *
+     * @see Walker::$db_fields
+     * @todo Decouple this.
+     */
+    public $db_fields = array( 'parent' => 'post_parent', 'id' => 'ID' );
+
+    /**
+     * Outputs the beginning of the current level in the tree before elements are output.
+     *
+     * @since 2.1.0
+     *
+     * @see Walker::start_lvl()
+     *
+     * @param string $output Used to append additional content (passed by reference).
+     * @param int    $depth  Optional. Depth of page. Used for padding. Default 0.
+     * @param array  $args   Optional. Arguments for outputting the next level.
+     *                       Default empty array.
+     */
+    public function start_lvl( &$output, $depth = 0, $args = array() ) {
+        if ( isset( $args['item_spacing'] ) && 'preserve' === $args['item_spacing'] ) {
+            $t = "\t";
+            $n = "\n";
+        } else {
+            $t = '';
+            $n = '';
+        }
+        $indent = str_repeat( $t, $depth );
+        $output .= "{$n}{$indent}<ul class='children'>{$n}";
+    }
+
+    /**
+     * Outputs the end of the current level in the tree after elements are output.
+     *
+     * @since 2.1.0
+     *
+     * @see Walker::end_lvl()
+     *
+     * @param string $output Used to append additional content (passed by reference).
+     * @param int    $depth  Optional. Depth of page. Used for padding. Default 0.
+     * @param array  $args   Optional. Arguments for outputting the end of the current level.
+     *                       Default empty array.
+     */
+    public function end_lvl( &$output, $depth = 0, $args = array() ) {
+        if ( isset( $args['item_spacing'] ) && 'preserve' === $args['item_spacing'] ) {
+            $t = "\t";
+            $n = "\n";
+        } else {
+            $t = '';
+            $n = '';
+        }
+        $indent = str_repeat( $t, $depth );
+        $output .= "{$indent}</ul>{$n}";
+    }
+
+    /**
+     * Outputs the beginning of the current element in the tree.
+     *
+     * @see Walker::start_el()
+     * @since 2.1.0
+     *
+     * @param string  $output       Used to append additional content. Passed by reference.
+     * @param WP_Post $page         Page data object.
+     * @param int     $depth        Optional. Depth of page. Used for padding. Default 0.
+     * @param array   $args         Optional. Array of arguments. Default empty array.
+     * @param int     $current_page Optional. Page ID. Default 0.
+     */
+    public function start_el( &$output, $page, $depth = 0, $args = array(), $current_page = 0 ) {
+        if ( isset( $args['item_spacing'] ) && 'preserve' === $args['item_spacing'] ) {
+            $t = "\t";
+            $n = "\n";
+        } else {
+            $t = '';
+            $n = '';
+        }
+        if ( $depth ) {
+            $indent = str_repeat( $t, $depth );
+        } else {
+            $indent = '';
+        }
+
+        $css_class = array( 'page_item', 'page-item-' . $page->ID );
+
+        if ( isset( $args['pages_with_children'][ $page->ID ] ) ) {
+            $css_class[] = 'page_item_has_children';
+        }
+
+        if ( ! empty( $current_page ) ) {
+            $_current_page = get_post( $current_page );
+            if ( $_current_page && in_array( $page->ID, $_current_page->ancestors ) ) {
+                $css_class[] = 'current_page_ancestor';
+            }
+            if ( $page->ID == $current_page ) {
+                $css_class[] = 'current_page_item';
+            } elseif ( $_current_page && $page->ID == $_current_page->post_parent ) {
+                $css_class[] = 'current_page_parent';
+            }
+        } elseif ( $page->ID == get_option('page_for_posts') ) {
+            $css_class[] = 'current_page_parent';
+        }
+
+        /**
+         * Filters the list of CSS classes to include with each page item in the list.
+         *
+         * @since 2.8.0
+         *
+         * @see wp_list_pages()
+         *
+         * @param array   $css_class    An array of CSS classes to be applied
+         *                              to each list item.
+         * @param WP_Post $page         Page data object.
+         * @param int     $depth        Depth of page, used for padding.
+         * @param array   $args         An array of arguments.
+         * @param int     $current_page ID of the current page.
+         */
+        $css_classes = implode( ' ', apply_filters( 'page_css_class', $css_class, $page, $depth, $args, $current_page ) );
+
+        if ( '' === $page->post_title ) {
+            /* translators: %d: ID of a post */
+            $page->post_title = sprintf( __( '#%d (no title)' ), $page->ID );
+        }
+
+        $args['link_before'] = empty( $args['link_before'] ) ? '' : $args['link_before'];
+        $args['link_after'] = empty( $args['link_after'] ) ? '' : $args['link_after'];
+
+        $atts = array();
+        $atts['href'] = get_permalink( $page->ID );
+
+        /**
+         * Filters the HTML attributes applied to a page menu item's anchor element.
+         *
+         * @since 4.8.0
+         *
+         * @param array $atts {
+         *     The HTML attributes applied to the menu item's `<a>` element, empty strings are ignored.
+         *
+         *     @type string $href The href attribute.
+         * }
+         * @param WP_Post $page         Page data object.
+         * @param int     $depth        Depth of page, used for padding.
+         * @param array   $args         An array of arguments.
+         * @param int     $current_page ID of the current page.
+         */
+        $atts = apply_filters( 'page_menu_link_attributes', $atts, $page, $depth, $args, $current_page );
+
+        $attributes = '';
+        foreach ( $atts as $attr => $value ) {
+            if ( ! empty( $value ) ) {
+                $value = esc_attr( $value );
+                $attributes .= ' ' . $attr . '="' . $value . '"';
+            }
+        }
+
+        $output .= $indent . sprintf(
+            '<li class="%s"><a%s>%s%s%s</a>',
+            $css_classes,
+            $attributes,
+            $args['link_before'],
+            /** This filter is documented in wp-includes/post-template.php */
+            apply_filters( 'the_title', $page->post_title, $page->ID ),
+            $args['link_after']
+        );
+
+        if ( ! empty( $args['show_date'] ) ) {
+            if ( 'modified' == $args['show_date'] ) {
+                $time = $page->post_modified;
+            } else {
+                $time = $page->post_date;
+            }
+
+            $date_format = empty( $args['date_format'] ) ? '' : $args['date_format'];
+            $output .= " " . mysql2date( $date_format, $time );
+        }
+    }
+
+    /**
+     * Outputs the end of the current element in the tree.
+     *
+     * @since 2.1.0
+     *
+     * @see Walker::end_el()
+     *
+     * @param string  $output Used to append additional content. Passed by reference.
+     * @param WP_Post $page   Page data object. Not used.
+     * @param int     $depth  Optional. Depth of page. Default 0 (unused).
+     * @param array   $args   Optional. Array of arguments. Default empty array.
+     */
+    public function end_el( &$output, $page, $depth = 0, $args = array() ) {
+        if ( isset( $args['item_spacing'] ) && 'preserve' === $args['item_spacing'] ) {
+            $t = "\t";
+            $n = "\n";
+        } else {
+            $t = '';
+            $n = '';
+        }
+        $output .= "</li>{$n}";
+    }
+
 }
+$subpagewalker = new Walker_Page_Cards();
+
+
+class Settings {
+
+  /**
+   * Sub-Page Peek
+   */
+  public function subpage_peek() {
+      global $post;
+
+      if(is_page())
+  {
+      //Assuming current working page is the parent
+      //
+      $the_parent_id = $post->ID;
+      //Otherwise get the greatest ancestor id
+      //
+
+      if(! empty($post->ancestors))
+      {
+          $the_parent_key = max(array_keys($post->ancestors));
+          $the_parent_id = $post->ancestors[$the_parent_key];
+      }
+
+      //First, get all of the pages
+      //
+      $all_wp_pages = get_pages();
+      //Get all of the children relative to the greatest ancestor
+      //
+      $page_services_children = get_page_children($the_parent_id, $all_wp_pages);
+
+      $page_walk_defaults = array();
+      $page_walk_defaults['depth'] = 3;
+      $page_walk_defaults['show_date'] = '';
+      $page_walk_defaults['date_format'] = get_option('date_format');
+      $page_walk_defaults['child_of'] = 0;
+      $page_walk_defaults['exclude'] = '';
+      $page_walk_defaults['title_li'] = '';
+      $page_walk_defaults['echo'] = 0;
+      $page_walk_defaults['authors'] = '';
+      $page_walk_defaults['sort_column'] = 'post_parent, menu_order';
+      $page_walk_defaults['link_before'] = '';
+      $page_walk_defaults['link_after'] = '';
+      $page_walk_defaults['walker'] = 'Walker_Page_Cards';
+      $output = '';
+      $output .= '<ul>';
+
+      //$output .= '<li>'.get_the_title($the_parent_id).'</li>';
+
+      $output .= walk_page_tree($page_services_children, $page_walk_defaults['depth'], $the_parent_id, $page_walk_defaults);
+      $output .= '</ul>';
+      $output = apply_filters('wp_list_pages', $output, $page_walk_defaults);
+      echo $output;
+  }
+  }
+
+}
+
+?>
